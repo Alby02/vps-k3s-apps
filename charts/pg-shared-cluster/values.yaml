@@ -10,5 +10,5 @@ cluster:
 apps:
   - name: kingshot-role-manager
     database:
-      name: kingshot_role_manager
+      name: kingshot-role-manager
       owner: kingshot

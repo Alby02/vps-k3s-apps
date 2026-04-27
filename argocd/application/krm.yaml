@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: kingshot-role-manager
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   project: default
   source:
@@ -15,7 +17,7 @@ spec:
           database:
             host: shared-postgres-rw.pg-clusters.svc.cluster.local
             port: "5432"
-            name: kingshot_role_manager
+            name: kingshot-role-manager
             user: kingshot
         secret:
           create: false
