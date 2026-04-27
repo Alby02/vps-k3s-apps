@@ -11,6 +11,8 @@ kind: Secret
 metadata:
   name: {{ $appName }}-db-creds
   namespace: {{ $.Values.namespaces.pgCluster }}
+  labels:
+    cnpg.io/reload: "true"
 type: kubernetes.io/basic-auth
 stringData:
   username: {{ $app.database.user | quote }}

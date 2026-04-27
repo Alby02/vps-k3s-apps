@@ -1,0 +1,6 @@
+releases:
+  - name: platform-bootstrap
+    namespace: default
+    chart: ./charts/bootstrap
+    values:
+      - ./values/bootstrap.yaml.gotmpl

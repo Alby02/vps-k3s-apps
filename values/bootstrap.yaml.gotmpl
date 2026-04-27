@@ -1,0 +1,13 @@
+namespaces:
+  pgCluster: pg-clusters
+
+apps:
+  kingshot-role-manager:
+    namespace: kingshot-role-manager
+    database:
+      secretName: krm-credentials
+      user: kingshot
+      password: {{ requiredEnv "KRM_DATABASE_PASSWORD" | quote }}
+    env:
+      DATABASE_PASSWORD: {{ requiredEnv "KRM_DATABASE_PASSWORD" | quote }}
+      DISCORD_TOKEN: {{ requiredEnv "DISCORD_BOT_TOKEN" | quote }}
