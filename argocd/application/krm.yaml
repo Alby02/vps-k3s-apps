@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kingshot-role-manager
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Alby02/kingshot-role-manager.git
+    targetRevision: HEAD
+    path: helm/kingshot-role-manager
+    helm:
+      values: |
+        config:
+          database:
+            host: shared-postgres-rw.pg-clusters.svc.cluster.local
+            port: "5432"
+            name: kingshot_role_manager
+            user: kingshot
+        secret:
+          create: false
+          existingSecret: krm-credentials
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kingshot-role-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

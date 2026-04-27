@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pg-shared-cluster
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Alby02/vps-k3s-apps.git
+    targetRevision: HEAD
+    path: charts/pg-shared-cluster
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: pg-clusters
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

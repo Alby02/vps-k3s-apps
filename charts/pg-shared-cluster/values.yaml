@@ -1,0 +1,14 @@
+namespace: pg-clusters
+
+cluster:
+  name: shared-postgres
+  instances: 1
+  primaryUpdateStrategy: unsupervised
+  storageClass: local-path
+  storageSize: 10Gi
+
+apps:
+  - name: kingshot-role-manager
+    database:
+      name: kingshot_role_manager
+      owner: kingshot

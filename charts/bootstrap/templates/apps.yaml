@@ -1,0 +1,30 @@
+{{- range $appName, $app := .Values.apps }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ $app.namespace }}
+---
+# The basic-auth secret for PostgreSQL (CNPG) in pg-clusters namespace
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ $appName }}-db-creds
+  namespace: {{ $.Values.namespaces.pgCluster }}
+type: kubernetes.io/basic-auth
+stringData:
+  username: {{ $app.database.user | quote }}
+  password: {{ $app.database.password | quote }}
+---
+# The app env secret in the app's namespace
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ $app.database.secretName }}
+  namespace: {{ $app.namespace }}
+type: Opaque
+stringData:
+{{- range $key, $val := $app.env }}
+  {{ $key }}: {{ $val | quote }}
+{{- end }}
+{{- end }}

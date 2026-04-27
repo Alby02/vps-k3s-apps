@@ -1,0 +1,4 @@
+namespaces:
+  pgCluster: pg-clusters
+
+apps: {}
