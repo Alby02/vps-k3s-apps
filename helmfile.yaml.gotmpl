@@ -11,7 +11,7 @@ releases:
             database:
               secretName: krm-credentials
               user: kingshot
-              password: "{{ requiredEnv \"KRM_DATABASE_PASSWORD\" }}"
+              password: {{ requiredEnv "KRM_DATABASE_PASSWORD" | quote }}
             env:
-              DATABASE_PASSWORD: "{{ requiredEnv \"KRM_DATABASE_PASSWORD\" }}"
-              DISCORD_TOKEN: "{{ requiredEnv \"DISCORD_BOT_TOKEN\" }}"
+              DATABASE_PASSWORD: {{ requiredEnv "KRM_DATABASE_PASSWORD" | quote }}
+              DISCORD_TOKEN: {{ requiredEnv "DISCORD_BOT_TOKEN" | quote }}
