@@ -13,6 +13,8 @@ spec:
     path: helm/kingshot-role-manager
     helm:
       values: |
+        image:
+          tag: sha-68b8fdb
         config:
           database:
             host: shared-postgres-rw.pg-clusters.svc.cluster.local
