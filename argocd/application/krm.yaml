@@ -14,7 +14,7 @@ spec:
     helm:
       values: |
         image:
-          tag: sha-68b8fdb
+          tag: sha-d46ed8b
         config:
           database:
             host: shared-postgres-rw.pg-clusters.svc.cluster.local
