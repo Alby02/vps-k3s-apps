@@ -4,10 +4,17 @@ namespaces:
 apps:
   kingshot-role-manager:
     namespace: kingshot-role-manager
+    envSecretName: krm-credentials
     database:
-      secretName: krm-credentials
       user: kingshot
       password: {{ requiredEnv "KRM_DATABASE_PASSWORD" | quote }}
     env:
       DATABASE_PASSWORD: {{ requiredEnv "KRM_DATABASE_PASSWORD" | quote }}
       DISCORD_TOKEN: {{ requiredEnv "DISCORD_BOT_TOKEN" | quote }}
+
+  tailscale:
+    namespace: tailscale
+    envSecretName: operator-oauth
+    env:
+      client_id: {{ requiredEnv "TS_CLIENT_ID" | quote }}
+      client_secret: {{ requiredEnv "TS_CLIENT_SECRET" | quote }}

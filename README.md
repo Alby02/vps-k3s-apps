@@ -1,50 +1,61 @@
-# Managing Apps and Databases
+# VPS K3s Apps & Infrastructure
 
-This repository uses a combination of `helmfile`, `dotenvx`, and ArgoCD to manage applications and their PostgreSQL databases dynamically. 
+This repository defines the core infrastructure, applications, and database configurations for my k3s cluster. It uses a combination of **ArgoCD** for GitOps, **Helmfile** for dynamic secret injection, and **dotenvx** for encrypted secret management.
 
-The centralized PostgreSQL cluster (CloudNativePG) is deployed in the `pg-clusters` namespace.
+## Current Infrastructure & Apps
 
-## How to add a new app with a database
+- **CloudNativePG (`pg-clusters`)**: A centralized PostgreSQL cluster that securely serves databases to applications across different namespaces.
+- **Kingshot Role Manager**: A Discord bot and OCR-based roster management system.
+- **Tailscale Operator & Exit Node**: Integrates the cluster securely into a Tailnet, providing an exit node for network routing.
 
-Follow these steps to securely onboard a new application that requires a database in the shared cluster.
+---
 
-### 1. Set the secure credentials
+## Onboarding a New Application
 
-First, generate and store the database password (and any other secrets) securely in your `.env` file using `dotenvx`.
+Follow these steps to securely onboard a new application to the cluster. You can onboard apps that require a database, or simple apps that only need environment variables.
+
+### 1. Store Credentials Securely
+
+First, generate and store any required secrets (database passwords, API tokens, OAuth credentials) securely in your `.env` file using `dotenvx`.
 
 ```bash
-# Add a database password
+# Example for an app requiring a database password
 dotenvx set MYAPP_DATABASE_PASSWORD "your-secure-password"
 
-# Add any other required secrets
+# Example for other tokens
 dotenvx set MYAPP_API_TOKEN "your-api-token"
 ```
 
-### 2. Configure `helmfile.yaml`
+### 2. Configure `values/bootstrap.yaml.gotmpl`
 
-Update `helmfile.yaml` to define your new application. This configuration tells the `bootstrap` chart to create the namespace and the necessary credential secrets.
+The `bootstrap` Helm chart dynamically provisions Namespaces and Kubernetes Secrets for your applications before ArgoCD deploys them. Open `values/bootstrap.yaml.gotmpl` and add your application under the `apps` dictionary.
 
-Add a new block under `apps`:
-
+#### Example A: App with a Database
 ```yaml
-        apps:
-          # ... existing apps ...
-          my-new-app:
-            namespace: my-new-app
-            database:
-              secretName: myapp-credentials
-              user: myapp_user
-              password: "{{ requiredEnv \"MYAPP_DATABASE_PASSWORD\" }}"
-            env:
-              # Inject the database password for the app to consume
-              DATABASE_PASSWORD: "{{ requiredEnv \"MYAPP_DATABASE_PASSWORD\" }}"
-              # Add any other environment variables you want in the secret
-              API_TOKEN: "{{ requiredEnv \"MYAPP_API_TOKEN\" }}"
+  my-new-app:
+    namespace: my-new-app
+    envSecretName: myapp-credentials
+    database:
+      user: myapp_user
+      password: {{ requiredEnv "MYAPP_DATABASE_PASSWORD" | quote }}
+    env:
+      DATABASE_PASSWORD: {{ requiredEnv "MYAPP_DATABASE_PASSWORD" | quote }}
+      API_TOKEN: {{ requiredEnv "MYAPP_API_TOKEN" | quote }}
 ```
 
-### 3. Register the database in the PostgreSQL Cluster
+#### Example B: App without a Database (e.g., Tailscale)
+If your app doesn't need a PostgreSQL database, simply omit the `database` block.
+```yaml
+  my-simple-app:
+    namespace: my-simple-app
+    envSecretName: simple-app-env
+    env:
+      API_TOKEN: {{ requiredEnv "MYAPP_API_TOKEN" | quote }}
+```
 
-Tell the shared PostgreSQL cluster to create the database and the role (user) for your application. Open `charts/pg-shared-cluster/values.yaml` and add your app to the `apps` list:
+### 3. Register the Database (If applicable)
+
+If you configured a `database` block in Step 2, you must tell the shared PostgreSQL cluster to create the actual database and role (user). Open `charts/pg-shared-cluster/values.yaml` and add your app to the list:
 
 ```yaml
 apps:
@@ -55,22 +66,26 @@ apps:
       owner: myapp_user
 ```
 
-> **Note:** The `owner` must exactly match the `database.user` you defined in `helmfile.yaml`. The `name` must exactly match the app key in `helmfile.yaml`.
+> **Note:** The `owner` must exactly match the `database.user` you defined in the bootstrap values. The `name` must exactly match the app key.
 
 ### 4. Create the ArgoCD Application
 
-Finally, create a new ArgoCD application manifest in `argocd/application/myapp.yaml` to deploy your actual application's Helm chart. 
+Create a new ArgoCD application manifest in the `argocd/application/` directory (e.g., `myapp.yaml`). This manifest tells ArgoCD where to find the actual Kubernetes manifests or Helm charts for your application.
 
-When configuring your Helm chart values in the ArgoCD application, be sure to:
-1. Set the database host to the cross-namespace service: `shared-postgres-rw.pg-clusters.svc.cluster.local`
-2. Configure your app to consume the existing secret you named in `helmfile.yaml` (e.g., `myapp-credentials`) rather than having the Helm chart create one.
+When configuring your app to run in the cluster:
+1. **Database Host**: Use the cross-namespace service: `shared-postgres-rw.pg-clusters.svc.cluster.local`
+2. **Secrets**: Configure your app to consume the existing secret you named in Step 2 (`envSecretName`) rather than having the application's Helm chart generate a new one.
 
-### 5. Apply the infrastructure changes
+### 5. Apply the Infrastructure Changes
 
-Run `helmfile` to apply the namespaces and secrets, then let ArgoCD handle the rest.
+Run `helmfile` to apply the bootstrap namespaces and encrypted secrets.
 
 ```bash
 dotenvx run -- helmfile apply
 ```
 
-Once this finishes, ArgoCD will synchronize, CloudNativePG will create your database/role, and your new application will spin up connected to it!
+Once this finishes, ArgoCD will synchronize the state, CloudNativePG will spin up your database, and your new application will deploy successfully!
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
