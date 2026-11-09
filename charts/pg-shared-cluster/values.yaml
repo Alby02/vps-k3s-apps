@@ -7,8 +7,4 @@ cluster:
   storageClass: local-path
   storageSize: 10Gi
 
-apps:
-  - name: kingshot-role-manager
-    database:
-      name: kingshot-role-manager
-      owner: kingshot
+apps: []

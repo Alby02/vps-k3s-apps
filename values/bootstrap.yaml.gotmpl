@@ -2,16 +2,6 @@ namespaces:
   pgCluster: pg-clusters
 
 apps:
-  kingshot-role-manager:
-    namespace: kingshot-role-manager
-    envSecretName: krm-credentials
-    database:
-      user: kingshot
-      password: {{ requiredEnv "KRM_DATABASE_PASSWORD" | quote }}
-    env:
-      DATABASE_PASSWORD: {{ requiredEnv "KRM_DATABASE_PASSWORD" | quote }}
-      DISCORD_TOKEN: {{ requiredEnv "DISCORD_BOT_TOKEN" | quote }}
-
   tailscale:
     namespace: tailscale
     envSecretName: operator-oauth

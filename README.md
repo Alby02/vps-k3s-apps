@@ -5,7 +5,6 @@ This repository defines the core infrastructure, applications, and database conf
 ## Current Infrastructure & Apps
 
 - **CloudNativePG (`pg-clusters`)**: A centralized PostgreSQL cluster that securely serves databases to applications across different namespaces.
-- **Kingshot Role Manager**: A Discord bot and OCR-based roster management system.
 - **Tailscale Operator & Exit Node**: Integrates the cluster securely into a Tailnet, providing an exit node for network routing.
 
 ---
